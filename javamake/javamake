@@ -1,0 +1,72 @@
+#!/bin/bash
+# author butch
+# version 1
+# à placer dans le dossier /usr/sbin
+
+
+# déclaration des fonctions avant leur appel
+
+PATH_TO_FX=/etc/javafx-sdk-15/lib
+ALL_MODULES=javafx.controls,javafx.base,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web
+#WORK_ADRR=$(cd $( dirname ${BASH_SOURCE[0]}) && pwd )
+
+
+#echo "Entrez le nom de la main class (ex : WhatElseDude) :"
+#read CLASS
+
+CLASS="$1"
+WORK_ADRR="$2"
+
+echo "Est-ce que les modules Javafx sont nécessaires ?  'oui' ou ø"
+read NEEDFX
+
+# suppression des majuscules
+PACKAGE=${CLASS,,}
+
+echo "package is $PACKAGE"
+
+TOBEJAVA=$WORK_ADRR/$PACKAGE
+echo $TOBEJAVA
+ok=1
+
+if [[ -d "$TOBEJAVA" ]]; then
+	cd $TOBEJAVA
+else
+	echo "$TOBEJAVA don't exist"
+	exit -1
+fi
+
+#for fich in $(find . -name "*.class"); do
+#	echo "$fich"
+#done
+
+
+OLD_CLASS=$(find . -name "$CLASS.class")
+if [[ -f "$OLD_CLASS" ]]; then
+	rm "$OLD_CLASS"
+	echo "old $OLD_CLASS removed"
+fi
+
+echo "-----------------------"
+
+JAVAFILE=$CLASS.java
+
+if [[ $NEEDFX == $"oui" ]]; then
+		echo "trying javac $JAVAFILE ..."
+		javac --module-path $PATH_TO_FX --add-modules $ALL_MODULES $JAVAFILE && echo "ok"
+
+		echo "trying java $CLASS ..."
+		cd ..
+		java --module-path $PATH_TO_FX --add-modules $ALL_MODULES $PACKAGE.$CLASS && echo "ok"
+
+else
+
+		echo "trying javac $JAVAFILE ..."
+		javac $JAVAFILE && echo "ok"
+
+		echo "trying java $CLASS ..."
+		cd ..
+		java $PACKAGE.$CLASS && echo "ok"
+
+fi
+

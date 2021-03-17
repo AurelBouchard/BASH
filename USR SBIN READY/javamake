@@ -1,0 +1,52 @@
+#!/bin/bash
+# author butch
+# version 
+# pour etre utilisé par PCmanFM-Qt en tant qu'action
+
+
+# déclaration des fonctions avant leur appel
+
+# variables/constantes
+PATH_TO_FX=/etc/javafx-sdk-15/lib
+ALL_MODULES=javafx.controls,javafx.base,javafx.fxml,javafx.graphics,javafx.media,javafx.swing,javafx.web
+
+# variable fournies par le sript d'appel :
+# $1 chemin complet du fichier .java ou .class
+FULLPATH="$1"
+FILE=$(basename $FULLPATH)
+TYPE=$(echo ${FILE##*.} )
+NAME=${FILE%%.*}
+PACKAGE=${NAME,,}
+
+#echo "full path "$FULLPATH
+#echo "file      "$FILE
+#echo "type      "$TYPE
+#echo "name      "$NAME
+#echo "package   "$PACKAGE
+#exit 0
+
+
+echo "Est-ce que les modules Javafx sont nécessaires ?  'oui' ou ø"
+read NEEDFX
+
+#sandbox $ javac lessonone/LessonOne.java
+#sandbox $ java lessonone.LessonOne
+
+if [[ $NEEDFX == $"oui" ]]; then
+	if [[ $TYPE -eq "java" ]]; then
+		echo "trying javac $FILE ..."
+		javac --module-path $PATH_TO_FX --add-modules $ALL_MODULES $PACKAGE/$FILE && echo "ok"
+	fi
+		echo "trying java $NAME ..."
+		java --module-path $PATH_TO_FX --add-modules $ALL_MODULES $PACKAGE.$NAME && echo "ok"
+
+else
+	if [[ $TYPE -eq "java" ]]; then
+		echo "trying javac $FILE ..."
+		javac $PACKAGE/$FILE && echo "ok"
+	fi
+		echo "trying java $NAME ..."
+		java $PACKAGE.$NAME && echo "ok"
+
+fi
+
